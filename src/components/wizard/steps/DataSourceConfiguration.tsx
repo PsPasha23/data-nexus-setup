@@ -1,8 +1,10 @@
 import React from 'react';
 import { useWizard } from '@/contexts/WizardContext';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Database, Globe, CreditCard, Building2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Database, Globe, CreditCard, Building2, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { CSVConfiguration } from '../configurations/CSVConfiguration';
 import { APIConfiguration } from '../configurations/APIConfiguration';
 import { StripeConfiguration } from '../configurations/StripeConfiguration';
@@ -59,6 +61,69 @@ export function DataSourceConfiguration() {
     }
   };
 
+  const closeConfiguration = () => {
+    setActiveSource('');
+  };
+
+  // If a source is active, show tab view
+  if (activeSourceId && configurations[activeSourceId]) {
+    return (
+      <div>
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-foreground mb-2">
+              Configure Your Data Sources
+            </h2>
+            <p className="text-muted-foreground">
+              Switch between data sources using the tabs below. Your progress is saved automatically.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={closeConfiguration}
+            className="flex items-center gap-2"
+          >
+            <X className="w-4 h-4" />
+            Close
+          </Button>
+        </div>
+
+        <Tabs
+          value={activeSourceId}
+          onValueChange={setActiveSource}
+          className="w-full"
+        >
+          <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1 h-auto p-1 bg-muted/50">
+            {configArray.map((config) => {
+              const Icon = sourceIcons[config.type];
+              const status = statusConfig[config.status];
+              
+              return (
+                <TabsTrigger
+                  key={config.id}
+                  value={config.id}
+                  className="flex items-center gap-2 p-3 h-auto data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="hidden sm:inline text-sm">{sourceLabels[config.type]}</span>
+                  <span className="text-xs">{status.icon}</span>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+
+          {configArray.map((config) => (
+            <TabsContent key={config.id} value={config.id} className="mt-6">
+              {renderConfiguration(config)}
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
+    );
+  }
+
+  // Default view - collapsed accordions
   return (
     <div>
       <div className="mb-6">
@@ -66,53 +131,43 @@ export function DataSourceConfiguration() {
           Configure Your Data Sources
         </h2>
         <p className="text-muted-foreground">
-          Expand each data source to configure it. Your progress will be saved automatically.
+          Click on any data source below to start configuring it. All your progress will be saved automatically.
         </p>
       </div>
 
-      <Accordion 
-        type="single" 
-        collapsible 
-        value={activeSourceId}
-        onValueChange={(value) => {
-          if (value) {
-            setActiveSource(value);
-          }
-        }}
-        className="w-full space-y-4"
-      >
+      <div className="space-y-4">
         {configArray.map((config) => {
           const Icon = sourceIcons[config.type];
           const status = statusConfig[config.status];
           
           return (
-            <AccordionItem 
-              key={config.id} 
-              value={config.id}
-              className="border rounded-lg px-6 py-2"
+            <div
+              key={config.id}
+              className="border rounded-lg p-4 cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={() => setActiveSource(config.id)}
             >
-              <AccordionTrigger className="hover:no-underline">
-                <div className="flex items-center justify-between w-full pr-4">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 rounded-lg bg-muted">
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div className="text-left">
-                      <h3 className="font-medium text-foreground">
-                        {sourceLabels[config.type]}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm">{status.icon}</span>
-                        <Badge variant={status.color} className="text-xs">
-                          {status.label}
-                        </Badge>
-                      </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-lg bg-muted">
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-foreground text-lg">
+                      {sourceLabels[config.type]}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm">{status.icon}</span>
+                      <Badge variant={status.color} className="text-xs">
+                        {status.label}
+                      </Badge>
                     </div>
                   </div>
-                  
+                </div>
+                
+                <div className="text-right">
                   {/* Configuration Summary */}
                   {config.status !== 'not_configured' && (
-                    <div className="text-right text-xs text-muted-foreground mr-4">
+                    <div className="text-sm text-muted-foreground space-y-1">
                       {config.dataType && (
                         <p>Data Type: {config.dataType.replace('_', ' + ')}</p>
                       )}
@@ -130,15 +185,15 @@ export function DataSourceConfiguration() {
                       )}
                     </div>
                   )}
+                  <div className="text-xs text-muted-foreground mt-2">
+                    Click to configure →
+                  </div>
                 </div>
-              </AccordionTrigger>
-              <AccordionContent className="pt-6 pb-4">
-                {renderConfiguration(config)}
-              </AccordionContent>
-            </AccordionItem>
+              </div>
+            </div>
           );
         })}
-      </Accordion>
+      </div>
     </div>
   );
 }
