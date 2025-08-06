@@ -67,47 +67,30 @@ export function DataSourceSelection() {
   const { state, toggleSource, updateConfig } = useWizard();
   const { selectedSources, configurations } = state;
   
-  const [pendingSource, setPendingSource] = useState<DataSourceType | null>(null);
   const [selectedDataType, setSelectedDataType] = useState<DataType | undefined>();
 
+  const requiresDataTypeSelection = selectedSources.some(source => 
+    source === 'csv' || source === 'api'
+  );
+
   const handleSourceClick = (sourceType: DataSourceType) => {
-    const option = dataSourceOptions.find(opt => opt.type === sourceType);
+    toggleSource(sourceType);
+  };
+
+  const handleDataTypeChange = (dataType: DataType) => {
+    setSelectedDataType(dataType);
     
-    if (option?.requiresDataType && !selectedSources.includes(sourceType)) {
-      // Show data type selection for CSV and API
-      setPendingSource(sourceType);
-      setSelectedDataType(undefined);
-    } else {
-      // Directly add/remove for Stripe and Salesforce, or if already selected
-      toggleSource(sourceType);
-    }
+    // Update all CSV and API configurations with the selected data type
+    Object.values(configurations).forEach(config => {
+      if (config.type === 'csv' || config.type === 'api') {
+        updateConfig(config.id, {
+          dataType: dataType,
+          status: 'in_progress',
+        });
+      }
+    });
   };
 
-  const handleDataTypeConfirm = () => {
-    if (pendingSource && selectedDataType) {
-      toggleSource(pendingSource);
-      
-      // Update the configuration with the selected data type
-      setTimeout(() => {
-        const sourceConfigs = Object.values(configurations).filter(c => c.type === pendingSource);
-        if (sourceConfigs.length > 0) {
-          const config = sourceConfigs[sourceConfigs.length - 1]; // Get the latest one
-          updateConfig(config.id, {
-            dataType: selectedDataType,
-            status: 'in_progress',
-          });
-        }
-      }, 100);
-      
-      setPendingSource(null);
-      setSelectedDataType(undefined);
-    }
-  };
-
-  const handleDataTypeCancel = () => {
-    setPendingSource(null);
-    setSelectedDataType(undefined);
-  };
 
   return (
     <div>
@@ -120,61 +103,6 @@ export function DataSourceSelection() {
           You can configure each source individually in the next step.
         </p>
       </div>
-
-      {/* Data Type Selection Modal */}
-      {pendingSource && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-2xl">
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4">
-                What kind of data do you maintain?
-              </h3>
-              <p className="text-sm text-muted-foreground mb-6">
-                This helps us configure the right data structure for your{' '}
-                {dataSourceOptions.find(opt => opt.type === pendingSource)?.title}.
-              </p>
-              
-              <RadioGroup value={selectedDataType} onValueChange={(value) => setSelectedDataType(value as DataType)}>
-                <div className="space-y-4">
-                  {dataTypeOptions.map((option) => (
-                    <div key={option.value} className="flex items-start space-x-3">
-                      <RadioGroupItem value={option.value} id={option.value} className="mt-1" />
-                      <div className="flex-1 space-y-2">
-                        <Label htmlFor={option.value} className="font-medium cursor-pointer">
-                          {option.label}
-                        </Label>
-                        <p className="text-sm text-muted-foreground">
-                          {option.description}
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {option.entities.map((entity) => (
-                            <Badge key={entity} variant="outline" className="text-xs">
-                              {entity}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </RadioGroup>
-              
-              <div className="flex justify-end gap-3 mt-6">
-                <Button variant="outline" onClick={handleDataTypeCancel}>
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleDataTypeConfirm}
-                  disabled={!selectedDataType}
-                >
-                  Continue
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {dataSourceOptions.map((option) => {
@@ -223,6 +151,54 @@ export function DataSourceSelection() {
           );
         })}
       </div>
+
+      {/* Data Type Selection - Required for CSV and API */}
+      {requiresDataTypeSelection && (
+        <Card className="mt-8 border-2 border-primary/20">
+          <CardContent className="p-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                What kind of data do you maintain?
+              </h3>
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="destructive" className="text-xs">Required</Badge>
+                <span className="text-sm text-muted-foreground">
+                  for Manual CSV Upload and API Integration
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Different calculation mechanisms will be considered based on the data type you select. 
+                This determines which entities and relationships will be configured for your data sources.
+              </p>
+            </div>
+            
+            <RadioGroup value={selectedDataType} onValueChange={(value) => handleDataTypeChange(value as DataType)}>
+              <div className="space-y-4">
+                {dataTypeOptions.map((option) => (
+                  <div key={option.value} className="flex items-start space-x-3">
+                    <RadioGroupItem value={option.value} id={option.value} className="mt-1" />
+                    <div className="flex-1 space-y-2">
+                      <Label htmlFor={option.value} className="font-medium cursor-pointer">
+                        {option.label}
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        {option.description}
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {option.entities.map((entity) => (
+                          <Badge key={entity} variant="outline" className="text-xs">
+                            {entity}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </RadioGroup>
+          </CardContent>
+        </Card>
+      )}
 
       {selectedSources.length > 0 && (
         <div className="mt-6 p-4 bg-muted/50 rounded-lg">
