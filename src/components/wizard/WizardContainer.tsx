@@ -32,73 +32,135 @@ export function WizardContainer() {
   ];
 
   return (
-    <Row gutter={32}>
+    <Row gutter={[32, 24]}>
       {/* Sidebar */}
       <Col span={8}>
-        <WizardSidebar />
+        <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <WizardSidebar />
+        </div>
       </Col>
 
       {/* Main Content */}
       <Col span={16}>
-        <Card style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}>
-          {/* Step Indicator */}
-          <Steps
-            current={currentStep - 1}
-            items={steps}
-            style={{ marginBottom: '32px' }}
-          />
+        <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <Card 
+            style={{ 
+              background: 'var(--gradient-card)',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: '16px',
+              boxShadow: 'var(--shadow-lg)',
+              overflow: 'hidden',
+            }}
+            bodyStyle={{ padding: '32px' }}
+          >
+            {/* Step Indicator */}
+            <div style={{ 
+              background: 'linear-gradient(90deg, hsl(var(--primary) / 0.1), hsl(var(--primary-glow) / 0.1))',
+              borderRadius: '12px',
+              padding: '24px',
+              marginBottom: '32px',
+            }}>
+              <Steps
+                current={currentStep - 1}
+                items={steps}
+                style={{ marginBottom: '0' }}
+              />
+            </div>
 
-          {/* Step Content */}
-          {currentStep === 1 && <DataSourceSelection />}
-          {currentStep === 2 && <DataSourceConfiguration />}
-          {currentStep === 3 && <RevenueConfiguration />}
+            {/* Step Content */}
+            <div style={{ minHeight: '400px', marginBottom: '32px' }}>
+              {currentStep === 1 && <DataSourceSelection />}
+              {currentStep === 2 && <DataSourceConfiguration />}
+              {currentStep === 3 && <RevenueConfiguration />}
+            </div>
 
-          {/* Navigation */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px' }}>
-            <Button
-              icon={<ArrowLeftOutlined />}
-              onClick={() => setStep(Math.max(1, currentStep - 1))}
-              disabled={currentStep === 1}
-            >
-              Previous
-            </Button>
+            {/* Navigation */}
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              padding: '20px 0',
+              borderTop: '1px solid hsl(var(--border))',
+              marginTop: '32px',
+            }}>
+              <Button
+                icon={<ArrowLeftOutlined />}
+                onClick={() => setStep(Math.max(1, currentStep - 1))}
+                disabled={currentStep === 1}
+                size="large"
+                style={{ 
+                  height: '44px',
+                  borderRadius: '8px',
+                  fontWeight: '500',
+                }}
+              >
+                Previous
+              </Button>
 
-            <Space>
-              {currentStep === 1 && (
-                <Button
-                  type="primary"
-                  icon={<ArrowRightOutlined />}
-                  iconPosition="end"
-                  onClick={() => setStep(2)}
-                  disabled={!canProceedToStep2}
-                >
-                  Continue to Configuration
-                </Button>
-              )}
-              
-              {currentStep === 2 && (
-                <Button
-                  type="primary"
-                  icon={<ArrowRightOutlined />}
-                  iconPosition="end"
-                  onClick={() => setStep(3)}
-                  disabled={!canProceedToStep3}
-                >
-                  Continue to Revenue Config
-                </Button>
-              )}
-              
-              {currentStep === 3 && (
-                <Button 
-                  type="primary"
-                  onClick={() => console.log('Complete setup')}
-                >
-                  Complete Setup
-                </Button>
-              )}
-            </Space>
-          </div>
-        </Card>
+              <Space size="large">
+                {currentStep === 1 && (
+                  <Button
+                    type="primary"
+                    icon={<ArrowRightOutlined />}
+                    iconPosition="end"
+                    onClick={() => setStep(2)}
+                    disabled={!canProceedToStep2}
+                    size="large"
+                    style={{ 
+                      height: '44px',
+                      borderRadius: '8px',
+                      fontWeight: '600',
+                      background: 'var(--gradient-primary)',
+                      border: 'none',
+                      boxShadow: 'var(--shadow-glow)',
+                    }}
+                  >
+                    Continue to Configuration
+                  </Button>
+                )}
+                
+                {currentStep === 2 && (
+                  <Button
+                    type="primary"
+                    icon={<ArrowRightOutlined />}
+                    iconPosition="end"
+                    onClick={() => setStep(3)}
+                    disabled={!canProceedToStep3}
+                    size="large"
+                    style={{ 
+                      height: '44px',
+                      borderRadius: '8px',
+                      fontWeight: '600',
+                      background: 'var(--gradient-primary)',
+                      border: 'none',
+                      boxShadow: 'var(--shadow-glow)',
+                    }}
+                  >
+                    Continue to Revenue Config
+                  </Button>
+                )}
+                
+                {currentStep === 3 && (
+                  <Button 
+                    type="primary"
+                    onClick={() => console.log('Complete setup')}
+                    size="large"
+                    style={{ 
+                      height: '44px',
+                      borderRadius: '8px',
+                      fontWeight: '600',
+                      background: 'var(--gradient-primary)',
+                      border: 'none',
+                      boxShadow: 'var(--shadow-glow)',
+                    }}
+                  >
+                    Complete Setup
+                  </Button>
+                )}
+              </Space>
+            </div>
+          </Card>
+        </div>
       </Col>
     </Row>
   );
