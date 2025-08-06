@@ -18,13 +18,13 @@ const dataTypeLabels = {
 };
 
 const dataTypeEntities = {
-  hierarchical: ['customers', 'invoices', 'payments', 'plans', 'subscriptions'],
-  invoice_payment: ['invoices', 'payments'],
+  hierarchical: ['customers', 'payments', 'invoices', 'plans', 'subscriptions'],
+  invoice_payment: ['payments', 'invoices'],
   plan_subscription: ['plans', 'subscriptions'],
 };
 
 const requiredEntities = {
-  hierarchical: ['customers', 'invoices', 'payments', 'plans', 'subscriptions'],
+  hierarchical: ['customers', 'payments', 'invoices', 'plans', 'subscriptions'],
   invoice_payment: ['payments'],
   plan_subscription: ['plans', 'subscriptions'],
 };
@@ -101,7 +101,7 @@ export function CSVConfiguration({ sourceId }: CSVConfigurationProps) {
       {/* Data Type Display */}
       <Card>
         <CardHeader>
-          <CardTitle>Data Type Configuration</CardTitle>
+          <CardTitle>Data model configuration</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
