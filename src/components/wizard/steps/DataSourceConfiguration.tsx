@@ -1,7 +1,8 @@
 import React from 'react';
 import { useWizard } from '@/contexts/WizardContext';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Database, Globe, CreditCard, Building2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { CSVConfiguration } from '../configurations/CSVConfiguration';
 import { APIConfiguration } from '../configurations/APIConfiguration';
 import { StripeConfiguration } from '../configurations/StripeConfiguration';
@@ -15,10 +16,16 @@ const sourceIcons = {
 };
 
 const sourceLabels = {
-  csv: 'CSV Upload',
+  csv: 'Manual CSV Upload',
   api: 'API Integration',
-  stripe: 'Stripe',
-  salesforce: 'Salesforce',
+  stripe: 'Stripe Integration',
+  salesforce: 'Salesforce Integration',
+};
+
+const statusConfig = {
+  not_configured: { label: 'Not Configured', color: 'secondary' as const, icon: '⭕' },
+  in_progress: { label: 'In Progress', color: 'default' as const, icon: '🟡' },
+  configured: { label: 'Configured', color: 'default' as const, icon: '✅' },
 };
 
 export function DataSourceConfiguration() {
@@ -36,9 +43,6 @@ export function DataSourceConfiguration() {
       </div>
     );
   }
-
-  const activeConfig = activeSourceId ? configurations[activeSourceId] : configArray[0];
-  const defaultValue = activeConfig?.id || configArray[0].id;
 
   const renderConfiguration = (config: any) => {
     switch (config.type) {
@@ -62,41 +66,79 @@ export function DataSourceConfiguration() {
           Configure Your Data Sources
         </h2>
         <p className="text-muted-foreground">
-          Set up each data source individually. Your progress will be saved automatically.
+          Expand each data source to configure it. Your progress will be saved automatically.
         </p>
       </div>
 
-      <Tabs
-        value={defaultValue}
-        onValueChange={setActiveSource}
-        className="w-full"
+      <Accordion 
+        type="single" 
+        collapsible 
+        value={activeSourceId}
+        onValueChange={(value) => {
+          if (value) {
+            setActiveSource(value);
+          }
+        }}
+        className="w-full space-y-4"
       >
-        <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1 h-auto p-1">
-          {configArray.map((config) => {
-            const Icon = sourceIcons[config.type];
-            const statusIcon = config.status === 'configured' ? '✅' : 
-                             config.status === 'in_progress' ? '🟡' : '⭕';
-            
-            return (
-              <TabsTrigger
-                key={config.id}
-                value={config.id}
-                className="flex items-center gap-2 p-3 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-              >
-                <Icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{sourceLabels[config.type]}</span>
-                <span className="text-xs">{statusIcon}</span>
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
-
-        {configArray.map((config) => (
-          <TabsContent key={config.id} value={config.id} className="mt-6">
-            {renderConfiguration(config)}
-          </TabsContent>
-        ))}
-      </Tabs>
+        {configArray.map((config) => {
+          const Icon = sourceIcons[config.type];
+          const status = statusConfig[config.status];
+          
+          return (
+            <AccordionItem 
+              key={config.id} 
+              value={config.id}
+              className="border rounded-lg px-6 py-2"
+            >
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center justify-between w-full pr-4">
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 rounded-lg bg-muted">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-medium text-foreground">
+                        {sourceLabels[config.type]}
+                      </h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm">{status.icon}</span>
+                        <Badge variant={status.color} className="text-xs">
+                          {status.label}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Configuration Summary */}
+                  {config.status !== 'not_configured' && (
+                    <div className="text-right text-xs text-muted-foreground mr-4">
+                      {config.dataType && (
+                        <p>Data Type: {config.dataType.replace('_', ' + ')}</p>
+                      )}
+                      {config.type === 'csv' && config.config.csv && (
+                        <p>Files: {config.config.csv.uploadedFiles.length}/{config.config.csv.requiredEntities.length}</p>
+                      )}
+                      {config.type === 'api' && config.config.api?.baseUrl && (
+                        <p>API: {new URL(config.config.api.baseUrl).hostname}</p>
+                      )}
+                      {config.type === 'stripe' && config.config.stripe?.secretKey && (
+                        <p>Mode: {config.config.stripe.secretKey.includes('test') ? 'Test' : 'Live'}</p>
+                      )}
+                      {config.type === 'salesforce' && config.config.salesforce?.instanceUrl && (
+                        <p>Org: {new URL(config.config.salesforce.instanceUrl).hostname}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-6 pb-4">
+                {renderConfiguration(config)}
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
     </div>
   );
 }
