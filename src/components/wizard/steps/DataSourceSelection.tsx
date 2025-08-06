@@ -98,7 +98,7 @@ export function DataSourceSelection() {
       <Accordion type="single" collapsible className="space-y-4">
         <AccordionItem value="data-sources">
           <AccordionTrigger className="text-xl font-semibold">
-            Which data sources would you like to configure?
+            Select data sources
           </AccordionTrigger>
           <AccordionContent>
             <div className="mb-6">
