@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -13,26 +12,17 @@ interface APIConfigurationProps {
   sourceId: string;
 }
 
-const dataTypeOptions = [
-  {
-    value: 'hierarchical' as DataType,
-    label: 'Hierarchical Data',
-    description: 'Complete entity relationships',
-    endpoints: ['customers', 'invoices', 'payments', 'plans', 'subscriptions'],
-  },
-  {
-    value: 'invoice_payment' as DataType,
-    label: 'Invoice + Payment',
-    description: 'Invoice and payment data only',
-    endpoints: ['invoices', 'payments'],
-  },
-  {
-    value: 'plan_subscription' as DataType,
-    label: 'Plan + Subscription',
-    description: 'Subscription plans and customer subscriptions',
-    endpoints: ['plans', 'subscriptions'],
-  },
-];
+const dataTypeLabels = {
+  hierarchical: 'Hierarchical Data',
+  invoice_payment: 'Invoice + Payment',
+  plan_subscription: 'Plan + Subscription',
+};
+
+const dataTypeEndpoints = {
+  hierarchical: ['customers', 'invoices', 'payments', 'plans', 'subscriptions'],
+  invoice_payment: ['invoices', 'payments'],
+  plan_subscription: ['plans', 'subscriptions'],
+};
 
 const authTypes = [
   { value: 'bearer', label: 'Bearer Token' },
@@ -44,14 +34,13 @@ export function APIConfiguration({ sourceId }: APIConfigurationProps) {
   const { getSourceConfig, updateConfig } = useWizard();
   const config = getSourceConfig(sourceId);
   
-  const [selectedDataType, setSelectedDataType] = useState<DataType | undefined>(config?.dataType);
+  const dataType = config?.dataType || 'hierarchical';
+  const requiredEndpoints = dataTypeEndpoints[dataType] || [];
+  
   const [baseUrl, setBaseUrl] = useState(config?.config.api?.baseUrl || '');
   const [authType, setAuthType] = useState<'bearer' | 'api_key' | 'basic'>(config?.config.api?.authType || 'bearer');
   const [credentials, setCredentials] = useState(config?.config.api?.credentials || {});
   const [endpoints, setEndpoints] = useState(config?.config.api?.endpoints || {});
-
-  const selectedOption = dataTypeOptions.find(option => option.value === selectedDataType);
-  const requiredEndpoints = selectedOption?.endpoints || [];
 
   useEffect(() => {
     // Auto-save configuration
@@ -60,9 +49,8 @@ export function APIConfiguration({ sourceId }: APIConfigurationProps) {
       requiredEndpoints.every(endpoint => endpoints[endpoint]);
 
     updateConfig(sourceId, {
-      dataType: selectedDataType,
-      status: selectedDataType && hasRequiredFields ? 'configured' : 
-               selectedDataType ? 'in_progress' : 'not_configured',
+      status: dataType && hasRequiredFields ? 'configured' : 
+               dataType ? 'in_progress' : 'not_configured',
       config: {
         ...config?.config,
         api: {
@@ -73,12 +61,7 @@ export function APIConfiguration({ sourceId }: APIConfigurationProps) {
         },
       },
     });
-  }, [selectedDataType, baseUrl, authType, credentials, endpoints, requiredEndpoints, sourceId, updateConfig, config?.config]);
-
-  const handleDataTypeChange = (dataType: DataType) => {
-    setSelectedDataType(dataType);
-    setEndpoints({}); // Reset endpoints when data type changes
-  };
+  }, [dataType, baseUrl, authType, credentials, endpoints, requiredEndpoints, sourceId, updateConfig, config?.config]);
 
   const handleCredentialChange = (key: string, value: string) => {
     setCredentials(prev => ({ ...prev, [key]: value }));
@@ -109,46 +92,37 @@ export function APIConfiguration({ sourceId }: APIConfigurationProps) {
 
   return (
     <div className="space-y-6">
-      {/* Data Type Selection */}
+      {/* Data Type Display */}
       <Card>
         <CardHeader>
-          <CardTitle>What kind of data do you maintain?</CardTitle>
+          <CardTitle>Data Type Configuration</CardTitle>
         </CardHeader>
         <CardContent>
-          <RadioGroup value={selectedDataType} onValueChange={handleDataTypeChange}>
-            <div className="space-y-4">
-              {dataTypeOptions.map((option) => (
-                <div key={option.value} className="flex items-start space-x-3">
-                  <RadioGroupItem value={option.value} id={option.value} className="mt-1" />
-                  <div className="flex-1 space-y-2">
-                    <Label htmlFor={option.value} className="font-medium cursor-pointer">
-                      {option.label}
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      {option.description}
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {option.endpoints.map((endpoint) => (
-                        <Badge key={endpoint} variant="outline" className="text-xs">
-                          {endpoint}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+          <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+            <div>
+              <h3 className="font-medium">{dataTypeLabels[dataType]}</h3>
+              <p className="text-sm text-muted-foreground">
+                {dataType === 'hierarchical' && 'Complete entity relationships'}
+                {dataType === 'invoice_payment' && 'Invoice and payment data only'}
+                {dataType === 'plan_subscription' && 'Subscription plans and customer subscriptions'}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-1 ml-auto">
+              {requiredEndpoints.map((endpoint) => (
+                <Badge key={endpoint} variant="outline" className="text-xs">
+                  {endpoint}
+                </Badge>
               ))}
             </div>
-          </RadioGroup>
+          </div>
         </CardContent>
       </Card>
 
       {/* API Configuration */}
-      {selectedDataType && (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle>API Connection Settings</CardTitle>
-            </CardHeader>
+      <Card>
+        <CardHeader>
+          <CardTitle>API Connection Settings</CardTitle>
+        </CardHeader>
             <CardContent className="space-y-4">
               {/* Base URL */}
               <div className="space-y-2">
@@ -259,8 +233,6 @@ export function APIConfiguration({ sourceId }: APIConfigurationProps) {
               </p>
             </CardContent>
           </Card>
-        </>
-      )}
     </div>
   );
 }
