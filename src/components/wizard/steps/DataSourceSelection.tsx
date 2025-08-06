@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useWizard, type DataSourceType, type DataType } from '@/contexts/WizardContext';
 import { Card, CardContent } from '@/components/ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -157,7 +156,7 @@ export function DataSourceSelection() {
       {requiresDataTypeSelection && (
         <Card className="mt-8 border-2 border-primary/20">
           <CardContent className="p-6">
-            <div className="mb-6">
+            <div className="mb-4">
               <h3 className="text-lg font-semibold text-foreground mb-2">
                 What kind of data do you maintain?
               </h3>
@@ -169,70 +168,34 @@ export function DataSourceSelection() {
               </div>
               <p className="text-sm text-muted-foreground">
                 Different calculation mechanisms will be considered based on the data type you select. 
-                Click on an option below to select your data structure.
+                This determines which entities and relationships will be configured for your data sources.
               </p>
             </div>
             
-            <Accordion 
-              type="single" 
-              collapsible 
-              value={selectedDataType}
-              onValueChange={(value) => {
-                if (value) {
-                  handleDataTypeChange(value as DataType);
-                }
-              }}
-              className="w-full space-y-3"
-            >
-              {dataTypeOptions.map((option, index) => (
-                <AccordionItem 
-                  key={option.value} 
-                  value={option.value}
-                  className={`border rounded-lg ${selectedDataType === option.value ? 'border-primary bg-primary/5' : 'border-border'}`}
-                >
-                  <AccordionTrigger className="hover:no-underline px-4 py-3">
-                    <div className="flex items-center gap-4 w-full">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                        selectedDataType === option.value 
-                          ? 'bg-primary text-primary-foreground' 
-                          : 'bg-muted text-muted-foreground'
-                      }`}>
-                        {index + 1}
-                      </div>
-                      <div className="flex-1 text-left">
-                        <h4 className="font-medium text-foreground">{option.label}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {option.description}
-                        </p>
-                      </div>
-                      {selectedDataType === option.value && (
-                        <Check className="w-5 h-5 text-primary" />
-                      )}
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-4 pb-4">
-                    <div className="mt-2 p-4 bg-muted/30 rounded-lg">
-                      <h5 className="font-medium text-sm mb-3">Required Data Entities:</h5>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <RadioGroup value={selectedDataType} onValueChange={(value) => handleDataTypeChange(value as DataType)}>
+              <div className="space-y-4">
+                {dataTypeOptions.map((option) => (
+                  <div key={option.value} className="flex items-start space-x-3">
+                    <RadioGroupItem value={option.value} id={option.value} className="mt-1" />
+                    <div className="flex-1 space-y-2">
+                      <Label htmlFor={option.value} className="font-medium cursor-pointer">
+                        {option.label}
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        {option.description}
+                      </p>
+                      <div className="flex flex-wrap gap-1">
                         {option.entities.map((entity) => (
-                          <Badge key={entity} variant="outline" className="text-xs justify-center py-1">
+                          <Badge key={entity} variant="outline" className="text-xs">
                             {entity}
                           </Badge>
                         ))}
                       </div>
-                      <div className="mt-4 p-3 bg-background border rounded-md">
-                        <p className="text-xs text-muted-foreground">
-                          <strong>Calculation Method:</strong> {' '}
-                          {option.value === 'hierarchical' && 'Full customer lifecycle analysis with complete entity relationships and revenue attribution across all touchpoints.'}
-                          {option.value === 'invoice_payment' && 'Transaction-based revenue tracking focusing on billing cycles and payment reconciliation.'}
-                          {option.value === 'plan_subscription' && 'Subscription-based metrics including MRR, churn analysis, and plan performance tracking.'}
-                        </p>
-                      </div>
                     </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+                  </div>
+                ))}
+              </div>
+            </RadioGroup>
           </CardContent>
         </Card>
       )}
