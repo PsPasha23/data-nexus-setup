@@ -1,17 +1,20 @@
+
 import React from 'react';
 import { Row, Col, Card, Steps, Button, Space } from 'antd';
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import { useWizard } from '@/contexts/WizardContext';
 import { DataSourceSelection } from './steps/DataSourceSelection';
 import { DataSourceConfiguration } from './steps/DataSourceConfiguration';
+import { RevenueConfiguration } from './steps/RevenueConfiguration';
 import { WizardSidebar } from './WizardSidebar';
 
 export function WizardContainer() {
   const { state, setStep } = useWizard();
-  const { currentStep, selectedSources } = state;
+  const { currentStep, selectedSources, configurations } = state;
 
   const canProceedToStep2 = selectedSources.length > 0;
-  const isLastStep = currentStep === 2;
+  const canProceedToStep3 = Object.values(configurations).some(config => config.status === 'configured');
+  const isLastStep = currentStep === 3;
 
   const steps = [
     {
@@ -21,6 +24,10 @@ export function WizardContainer() {
     {
       title: 'Configure',
       description: 'Set up connections'
+    },
+    {
+      title: 'Revenue Config',
+      description: 'Basic revenue settings'
     }
   ];
 
@@ -44,6 +51,7 @@ export function WizardContainer() {
           {/* Step Content */}
           {currentStep === 1 && <DataSourceSelection />}
           {currentStep === 2 && <DataSourceConfiguration />}
+          {currentStep === 3 && <RevenueConfiguration />}
 
           {/* Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px' }}>
@@ -69,6 +77,18 @@ export function WizardContainer() {
               )}
               
               {currentStep === 2 && (
+                <Button
+                  type="primary"
+                  icon={<ArrowRightOutlined />}
+                  iconPosition="end"
+                  onClick={() => setStep(3)}
+                  disabled={!canProceedToStep3}
+                >
+                  Continue to Revenue Config
+                </Button>
+              )}
+              
+              {currentStep === 3 && (
                 <Button 
                   type="primary"
                   onClick={() => console.log('Complete setup')}

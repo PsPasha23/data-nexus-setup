@@ -6,6 +6,15 @@ export type DataType = 'hierarchical' | 'invoice_payment' | 'plan_subscription';
 
 export type SourceStatus = 'not_configured' | 'in_progress' | 'configured';
 
+export type StatusRecognition = 'success' | 'paid' | 'refund' | 'chargeback';
+
+export type TaxHandling = 'dont_include' | 'include';
+
+export type RevenueConfig = {
+  statusRecognition: StatusRecognition[];
+  taxHandling: TaxHandling;
+};
+
 export interface DataSourceConfig {
   id: string;
   type: DataSourceType;
@@ -42,6 +51,7 @@ interface WizardState {
   selectedSources: DataSourceType[];
   configurations: Record<string, DataSourceConfig>;
   activeSourceId?: string;
+  revenueConfig: RevenueConfig;
 }
 
 type WizardAction =
@@ -50,6 +60,7 @@ type WizardAction =
   | { type: 'SET_ACTIVE_SOURCE'; payload: string }
   | { type: 'UPDATE_CONFIG'; payload: { sourceId: string; config: Partial<DataSourceConfig> } }
   | { type: 'REMOVE_SOURCE'; payload: string }
+  | { type: 'UPDATE_REVENUE_CONFIG'; payload: Partial<RevenueConfig> }
   | { type: 'LOAD_STATE'; payload: WizardState };
 
 const initialState: WizardState = {
@@ -57,6 +68,10 @@ const initialState: WizardState = {
   selectedSources: [],
   configurations: {},
   activeSourceId: undefined,
+  revenueConfig: {
+    statusRecognition: ['success', 'paid'],
+    taxHandling: 'dont_include',
+  },
 };
 
 function wizardReducer(state: WizardState, action: WizardAction): WizardState {
@@ -140,6 +155,16 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
       };
     }
     
+    case 'UPDATE_REVENUE_CONFIG': {
+      return {
+        ...state,
+        revenueConfig: {
+          ...state.revenueConfig,
+          ...action.payload,
+        },
+      };
+    }
+    
     case 'LOAD_STATE':
       return action.payload;
     
@@ -155,6 +180,7 @@ interface WizardContextType {
   setActiveSource: (sourceId: string) => void;
   updateConfig: (sourceId: string, config: Partial<DataSourceConfig>) => void;
   removeSource: (sourceId: string) => void;
+  updateRevenueConfig: (config: Partial<RevenueConfig>) => void;
   getSourceConfig: (sourceId: string) => DataSourceConfig | undefined;
   getSourcesByType: (type: DataSourceType) => DataSourceConfig[];
 }
@@ -202,6 +228,10 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'REMOVE_SOURCE', payload: sourceId });
   };
 
+  const updateRevenueConfig = (config: Partial<RevenueConfig>) => {
+    dispatch({ type: 'UPDATE_REVENUE_CONFIG', payload: config });
+  };
+
   const getSourceConfig = (sourceId: string) => {
     return state.configurations[sourceId];
   };
@@ -217,6 +247,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     setActiveSource,
     updateConfig,
     removeSource,
+    updateRevenueConfig,
     getSourceConfig,
     getSourcesByType,
   };
