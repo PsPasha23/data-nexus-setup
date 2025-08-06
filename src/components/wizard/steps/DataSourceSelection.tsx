@@ -97,7 +97,7 @@ export function DataSourceSelection() {
 
   return (
     <div>
-      <Accordion type="single" collapsible className="space-y-4">
+      <Accordion type="single" collapsible defaultValue="data-sources" className="space-y-4">
         <AccordionItem value="data-sources">
           <AccordionTrigger className="text-xl font-semibold">
             1. Select data sources
