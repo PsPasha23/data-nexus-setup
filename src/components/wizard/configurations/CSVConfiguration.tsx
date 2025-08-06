@@ -18,14 +18,14 @@ const dataTypeLabels = {
 };
 
 const dataTypeEntities = {
-  hierarchical: ['customers', 'payments', 'invoices', 'plans', 'subscriptions'],
-  invoice_payment: ['payments', 'invoices'],
+  hierarchical: ['customers', 'transaction', 'invoices', 'plans', 'subscriptions'],
+  invoice_payment: ['transaction', 'invoices'],
   plan_subscription: ['plans', 'subscriptions'],
 };
 
 const requiredEntities = {
-  hierarchical: ['customers', 'payments', 'invoices', 'plans', 'subscriptions'],
-  invoice_payment: ['payments'],
+  hierarchical: ['customers', 'transaction', 'invoices', 'plans', 'subscriptions'],
+  invoice_payment: ['transaction'],
   plan_subscription: ['plans', 'subscriptions'],
 };
 

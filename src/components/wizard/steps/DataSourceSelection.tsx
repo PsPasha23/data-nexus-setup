@@ -44,17 +44,17 @@ const dataSourceOptions = [
 const dataTypeOptions = [
   {
     value: 'invoice_payment' as DataType,
-    label: 'Payments',
-    description: 'Invoice and payment data',
-    entities: ['invoices', 'payments'],
-    requiredEntities: ['payments'],
+    label: 'Transaction',
+    description: 'Invoice and transaction data',
+    entities: ['invoices', 'transaction'],
+    requiredEntities: ['transaction'],
     optionalEntities: ['invoices'],
   },
   {
     value: 'hierarchical' as DataType,
     label: 'Complete Revenue Data',
-    description: 'Complete entity relationships (customers, invoices, payments, plans, subscriptions) - Coming Soon',
-    entities: ['customers', 'invoices', 'payments', 'plans', 'subscriptions'],
+    description: 'Complete entity relationships (customers, invoices, transaction, plans, subscriptions) - Coming Soon',
+    entities: ['customers', 'invoices', 'transaction', 'plans', 'subscriptions'],
     disabled: true,
   },
   {

@@ -19,8 +19,8 @@ const dataTypeLabels = {
 };
 
 const dataTypeEndpoints = {
-  hierarchical: ['customers', 'invoices', 'payments', 'plans', 'subscriptions'],
-  invoice_payment: ['invoices', 'payments'],
+  hierarchical: ['customers', 'invoices', 'transaction', 'plans', 'subscriptions'],
+  invoice_payment: ['invoices', 'transaction'],
   plan_subscription: ['plans', 'subscriptions'],
 };
 
