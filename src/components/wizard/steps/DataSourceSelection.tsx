@@ -45,22 +45,24 @@ const dataSourceOptions = [
 
 const dataTypeOptions = [
   {
-    value: 'hierarchical' as DataType,
-    label: 'Complete Revenue Data',
-    description: 'Complete entity relationships (customers, invoices, payments, plans, subscriptions)',
-    entities: ['customers', 'invoices', 'payments', 'plans', 'subscriptions'],
-  },
-  {
     value: 'invoice_payment' as DataType,
-    label: 'Invoice + Payment',
+    label: 'Payments',
     description: 'Invoice and payment data only',
     entities: ['invoices', 'payments'],
   },
   {
+    value: 'hierarchical' as DataType,
+    label: 'Complete Revenue Data',
+    description: 'Complete entity relationships (customers, invoices, payments, plans, subscriptions) - Coming Soon',
+    entities: ['customers', 'invoices', 'payments', 'plans', 'subscriptions'],
+    disabled: true,
+  },
+  {
     value: 'plan_subscription' as DataType,
     label: 'Plan + Subscription',
-    description: 'Subscription plans and customer subscriptions',
+    description: 'Subscription plans and customer subscriptions - Coming Soon',
     entities: ['plans', 'subscriptions'],
+    disabled: true,
   },
 ];
 
@@ -202,10 +204,15 @@ export function DataSourceSelection() {
               <RadioGroup value={selectedDataType} onValueChange={(value) => handleDataTypeChange(value as DataType)}>
                 <div className="space-y-4">
                   {dataTypeOptions.map((option) => (
-                    <div key={option.value} className="flex items-start space-x-3">
-                      <RadioGroupItem value={option.value} id={option.value} className="mt-1" />
+                    <div key={option.value} className={`flex items-start space-x-3 ${option.disabled ? 'opacity-50' : ''}`}>
+                      <RadioGroupItem 
+                        value={option.value} 
+                        id={option.value} 
+                        className="mt-1" 
+                        disabled={option.disabled}
+                      />
                       <div className="flex-1 space-y-2">
-                        <Label htmlFor={option.value} className="font-medium cursor-pointer">
+                        <Label htmlFor={option.value} className={`font-medium ${option.disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
                           {option.label}
                         </Label>
                         <p className="text-sm text-muted-foreground">
