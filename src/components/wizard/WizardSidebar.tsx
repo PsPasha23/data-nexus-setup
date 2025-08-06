@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Button, Badge, Typography, Space, Divider } from 'antd';
-import { PlusOutlined, DatabaseOutlined, GlobalOutlined, CreditCardOutlined, BuildOutlined, CloseOutlined } from '@ant-design/icons';
+import { PlusOutlined, DatabaseOutlined, GlobalOutlined, CreditCardOutlined, TeamOutlined, CloseOutlined } from '@ant-design/icons';
 import { useWizard } from '@/contexts/WizardContext';
 import type { DataSourceType } from '@/contexts/WizardContext';
 
@@ -10,7 +10,7 @@ const sourceIcons = {
   csv: DatabaseOutlined,
   api: GlobalOutlined,
   stripe: CreditCardOutlined,
-  salesforce: BuildOutlined,
+  salesforce: TeamOutlined,
 };
 
 const sourceLabels = {
