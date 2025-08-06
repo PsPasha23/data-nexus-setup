@@ -23,6 +23,18 @@ const dataTypeEntities = {
   plan_subscription: ['plans', 'subscriptions'],
 };
 
+const requiredEntities = {
+  hierarchical: ['customers', 'invoices', 'payments', 'plans', 'subscriptions'],
+  invoice_payment: ['payments'],
+  plan_subscription: ['plans', 'subscriptions'],
+};
+
+const optionalEntities = {
+  hierarchical: [],
+  invoice_payment: ['invoices'],
+  plan_subscription: [],
+};
+
 export function CSVConfiguration({ sourceId }: CSVConfigurationProps) {
   const { getSourceConfig, updateConfig } = useWizard();
   const config = getSourceConfig(sourceId);
@@ -32,23 +44,27 @@ export function CSVConfiguration({ sourceId }: CSVConfigurationProps) {
   );
 
   const dataType = config?.dataType || 'hierarchical';
-  const requiredEntities = dataTypeEntities[dataType] || [];
+  const allEntities = dataTypeEntities[dataType] || [];
+  const mandatoryEntities = requiredEntities[dataType] || [];
+  const optionalEntitiesList = optionalEntities[dataType] || [];
 
   const handleFileUpload = (entityType: string, file: File) => {
     const newFiles = [...uploadedFiles.filter(f => f.entityType !== entityType), { name: file.name, entityType, file }];
     setUploadedFiles(newFiles);
     
-    const allFilesUploaded = requiredEntities.every(entity => 
+    const allRequiredFilesUploaded = mandatoryEntities.every(entity => 
       newFiles.some(f => f.entityType === entity)
     );
     
     updateConfig(sourceId, {
-      status: allFilesUploaded ? 'configured' : 'in_progress',
+      status: allRequiredFilesUploaded ? 'configured' : 'in_progress',
       config: {
         ...config?.config,
         csv: {
           uploadedFiles: newFiles,
-          requiredEntities,
+          requiredEntities: mandatoryEntities,
+          optionalEntities: optionalEntitiesList,
+          allEntities,
         },
       },
     });
@@ -58,13 +74,19 @@ export function CSVConfiguration({ sourceId }: CSVConfigurationProps) {
     const newFiles = uploadedFiles.filter(f => f.entityType !== entityType);
     setUploadedFiles(newFiles);
     
+    const allRequiredFilesUploaded = mandatoryEntities.every(entity => 
+      newFiles.some(f => f.entityType === entity)
+    );
+    
     updateConfig(sourceId, {
-      status: newFiles.length === requiredEntities.length ? 'configured' : 'in_progress',
+      status: allRequiredFilesUploaded ? 'configured' : 'in_progress',
       config: {
         ...config?.config,
         csv: {
           uploadedFiles: newFiles,
-          requiredEntities,
+          requiredEntities: mandatoryEntities,
+          optionalEntities: optionalEntitiesList,
+          allEntities,
         },
       },
     });
@@ -92,9 +114,13 @@ export function CSVConfiguration({ sourceId }: CSVConfigurationProps) {
               </p>
             </div>
             <div className="flex flex-wrap gap-1 ml-auto">
-              {requiredEntities.map((entity) => (
-                <Badge key={entity} variant="outline" className="text-xs">
-                  {entity}
+              {allEntities.map((entity) => (
+                <Badge 
+                  key={entity} 
+                  variant={mandatoryEntities.includes(entity) ? "default" : "outline"} 
+                  className="text-xs"
+                >
+                  {entity} {mandatoryEntities.includes(entity) ? "(required)" : "(optional)"}
                 </Badge>
               ))}
             </div>
@@ -112,7 +138,7 @@ export function CSVConfiguration({ sourceId }: CSVConfigurationProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {requiredEntities.map((entityType) => {
+            {allEntities.map((entityType) => {
               const uploadedFile = getFileForEntity(entityType);
               
               return (
@@ -120,6 +146,9 @@ export function CSVConfiguration({ sourceId }: CSVConfigurationProps) {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Label className="font-medium capitalize">{entityType} CSV</Label>
+                      <Badge variant={mandatoryEntities.includes(entityType) ? "destructive" : "secondary"} className="text-xs">
+                        {mandatoryEntities.includes(entityType) ? "Required" : "Optional"}
+                      </Badge>
                       {uploadedFile && (
                         <CheckCircle className="w-4 h-4 text-green-500" />
                       )}
@@ -168,7 +197,12 @@ export function CSVConfiguration({ sourceId }: CSVConfigurationProps) {
           {uploadedFiles.length > 0 && (
             <div className="mt-4 p-3 bg-muted/50 rounded-lg">
               <p className="text-sm text-muted-foreground">
-                Progress: {uploadedFiles.length} of {requiredEntities.length} files uploaded
+                Progress: {uploadedFiles.filter(f => mandatoryEntities.includes(f.entityType)).length} of {mandatoryEntities.length} required files uploaded
+                {optionalEntitiesList.length > 0 && (
+                  <span className="block">
+                    Optional: {uploadedFiles.filter(f => optionalEntitiesList.includes(f.entityType)).length} of {optionalEntitiesList.length} files uploaded
+                  </span>
+                )}
               </p>
             </div>
           )}

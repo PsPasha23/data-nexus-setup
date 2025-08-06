@@ -47,8 +47,10 @@ const dataTypeOptions = [
   {
     value: 'invoice_payment' as DataType,
     label: 'Payments',
-    description: 'Invoice and payment data only',
+    description: 'Invoice and payment data',
     entities: ['invoices', 'payments'],
+    requiredEntities: ['payments'],
+    optionalEntities: ['invoices'],
   },
   {
     value: 'hierarchical' as DataType,

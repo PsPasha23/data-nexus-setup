@@ -15,6 +15,8 @@ export interface DataSourceConfig {
     csv?: {
       uploadedFiles: Array<{ name: string; entityType: string; file: File }>;
       requiredEntities: string[];
+      optionalEntities?: string[];
+      allEntities?: string[];
     };
     api?: {
       baseUrl: string;
