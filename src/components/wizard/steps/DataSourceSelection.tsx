@@ -46,7 +46,7 @@ const dataSourceOptions = [
 const dataTypeOptions = [
   {
     value: 'hierarchical' as DataType,
-    label: 'Hierarchical Data',
+    label: 'Complete Revenue Data',
     description: 'Complete entity relationships (customers, invoices, payments, plans, subscriptions)',
     entities: ['customers', 'invoices', 'payments', 'plans', 'subscriptions'],
   },
@@ -183,7 +183,7 @@ export function DataSourceSelection() {
         {requiresDataTypeSelection && (
           <AccordionItem value="data-type">
             <AccordionTrigger className="text-xl font-semibold">
-              What kind of data do you maintain?
+              Select Your Data Model
             </AccordionTrigger>
             <AccordionContent>
               <div className="mb-4">
