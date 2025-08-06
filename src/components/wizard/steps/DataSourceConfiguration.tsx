@@ -1,20 +1,20 @@
 import React from 'react';
+import { Tabs, Badge, Button, Typography, Space, Card } from 'antd';
+import { DatabaseOutlined, GlobalOutlined, CreditCardOutlined, BuildOutlined, CloseOutlined } from '@ant-design/icons';
 import { useWizard } from '@/contexts/WizardContext';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Database, Globe, CreditCard, Building2, X } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { CSVConfiguration } from '../configurations/CSVConfiguration';
 import { APIConfiguration } from '../configurations/APIConfiguration';
 import { StripeConfiguration } from '../configurations/StripeConfiguration';
 import { SalesforceConfiguration } from '../configurations/SalesforceConfiguration';
 
+const { Title, Text } = Typography;
+const { TabPane } = Tabs;
+
 const sourceIcons = {
-  csv: Database,
-  api: Globe,
-  stripe: CreditCard,
-  salesforce: Building2,
+  csv: DatabaseOutlined,
+  api: GlobalOutlined,
+  stripe: CreditCardOutlined,
+  salesforce: BuildOutlined,
 };
 
 const sourceLabels = {
@@ -25,9 +25,9 @@ const sourceLabels = {
 };
 
 const statusConfig = {
-  not_configured: { label: 'Not Configured', color: 'secondary' as const, icon: '⭕' },
-  in_progress: { label: 'In Progress', color: 'default' as const, icon: '🟡' },
-  configured: { label: 'Configured', color: 'default' as const, icon: '✅' },
+  not_configured: { label: 'Not Configured', color: 'default' as const, icon: '⭕' },
+  in_progress: { label: 'In Progress', color: 'processing' as const, icon: '🟡' },
+  configured: { label: 'Configured', color: 'success' as const, icon: '✅' },
 };
 
 export function DataSourceConfiguration() {
@@ -38,10 +38,10 @@ export function DataSourceConfiguration() {
 
   if (configArray.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">
+      <div style={{ textAlign: 'center', padding: '48px 0' }}>
+        <Text type="secondary">
           No data sources selected. Please go back to select your data sources.
-        </p>
+        </Text>
       </div>
     );
   }
@@ -68,132 +68,143 @@ export function DataSourceConfiguration() {
   // If a source is active, show tab view
   if (activeSourceId && configurations[activeSourceId]) {
     return (
-      <div>
-        <div className="mb-6 flex items-center justify-between">
+      <Space direction="vertical" style={{ width: '100%' }} size="large">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">
+            <Title level={2} style={{ color: 'hsl(var(--foreground))', marginBottom: '8px' }}>
               Configure Your Data Sources
-            </h2>
-            <p className="text-muted-foreground">
+            </Title>
+            <Text type="secondary">
               Switch between data sources using the tabs below. Your progress is saved automatically.
-            </p>
+            </Text>
           </div>
           <Button
-            variant="outline"
-            size="sm"
+            size="small"
+            icon={<CloseOutlined />}
             onClick={closeConfiguration}
-            className="flex items-center gap-2"
           >
-            <X className="w-4 h-4" />
             Close
           </Button>
         </div>
 
         <Tabs
-          value={activeSourceId}
-          onValueChange={setActiveSource}
-          className="w-full"
+          activeKey={activeSourceId}
+          onChange={setActiveSource}
+          type="card"
         >
-          <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1 h-auto p-1 bg-muted/50">
-            {configArray.map((config) => {
-              const Icon = sourceIcons[config.type];
-              const status = statusConfig[config.status];
-              
-              return (
-                <TabsTrigger
-                  key={config.id}
-                  value={config.id}
-                  className="flex items-center gap-2 p-3 h-auto data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
-                >
-                  <Icon className="w-4 h-4" />
-                  <span className="hidden sm:inline text-sm">{sourceLabels[config.type]}</span>
-                  <span className="text-xs">{status.icon}</span>
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-
-          {configArray.map((config) => (
-            <TabsContent key={config.id} value={config.id} className="mt-6">
-              {renderConfiguration(config)}
-            </TabsContent>
-          ))}
+          {configArray.map((config) => {
+            const Icon = sourceIcons[config.type];
+            const status = statusConfig[config.status];
+            
+            return (
+              <TabPane
+                key={config.id}
+                tab={
+                  <Space>
+                    <Icon />
+                    <span style={{ display: window.innerWidth > 640 ? 'inline' : 'none' }}>
+                      {sourceLabels[config.type]}
+                    </span>
+                    <span style={{ fontSize: '12px' }}>{status.icon}</span>
+                  </Space>
+                }
+              >
+                {renderConfiguration(config)}
+              </TabPane>
+            );
+          })}
         </Tabs>
-      </div>
+      </Space>
     );
   }
 
   // Default view - collapsed accordions
   return (
-    <div>
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-foreground mb-2">
+    <Space direction="vertical" style={{ width: '100%' }} size="large">
+      <div>
+        <Title level={2} style={{ color: 'hsl(var(--foreground))', marginBottom: '8px' }}>
           Configure Your Data Sources
-        </h2>
-        <p className="text-muted-foreground">
+        </Title>
+        <Text type="secondary">
           Click on any data source below to start configuring it. All your progress will be saved automatically.
-        </p>
+        </Text>
       </div>
 
-      <div className="space-y-4">
+      <Space direction="vertical" style={{ width: '100%' }} size="middle">
         {configArray.map((config) => {
           const Icon = sourceIcons[config.type];
           const status = statusConfig[config.status];
           
           return (
-            <div
+            <Card
               key={config.id}
-              className="border rounded-lg p-4 cursor-pointer hover:border-primary/50 transition-colors"
+              hoverable
+              style={{ 
+                cursor: 'pointer',
+                border: '1px solid hsl(var(--border))'
+              }}
               onClick={() => setActiveSource(config.id)}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-lg bg-muted">
-                    <Icon className="w-6 h-6" />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Space size="large">
+                  <div style={{ 
+                    padding: '12px', 
+                    borderRadius: '8px', 
+                    background: 'hsl(var(--muted))' 
+                  }}>
+                    <Icon style={{ fontSize: '24px' }} />
                   </div>
                   <div>
-                    <h3 className="font-medium text-foreground text-lg">
+                    <Title level={4} style={{ margin: 0, color: 'hsl(var(--foreground))' }}>
                       {sourceLabels[config.type]}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-sm">{status.icon}</span>
-                      <Badge variant={status.color} className="text-xs">
-                        {status.label}
-                      </Badge>
-                    </div>
+                    </Title>
+                    <Space style={{ marginTop: '4px' }}>
+                      <span style={{ fontSize: '14px' }}>{status.icon}</span>
+                      <Badge color={status.color} text={status.label} />
+                    </Space>
                   </div>
-                </div>
+                </Space>
                 
-                <div className="text-right">
+                <div style={{ textAlign: 'right' }}>
                   {/* Configuration Summary */}
                   {config.status !== 'not_configured' && (
-                    <div className="text-sm text-muted-foreground space-y-1">
+                    <Space direction="vertical" size="small" align="end">
                       {config.dataType && (
-                        <p>Data Type: {config.dataType.replace('_', ' + ')}</p>
+                        <Text type="secondary" style={{ fontSize: '14px' }}>
+                          Data Type: {config.dataType.replace('_', ' + ')}
+                        </Text>
                       )}
                       {config.type === 'csv' && config.config.csv && (
-                        <p>Files: {config.config.csv.uploadedFiles.length}/{config.config.csv.requiredEntities.length}</p>
+                        <Text type="secondary" style={{ fontSize: '14px' }}>
+                          Files: {config.config.csv.uploadedFiles.length}/{config.config.csv.requiredEntities.length}
+                        </Text>
                       )}
                       {config.type === 'api' && config.config.api?.baseUrl && (
-                        <p>API: {new URL(config.config.api.baseUrl).hostname}</p>
+                        <Text type="secondary" style={{ fontSize: '14px' }}>
+                          API: {new URL(config.config.api.baseUrl).hostname}
+                        </Text>
                       )}
                       {config.type === 'stripe' && config.config.stripe?.secretKey && (
-                        <p>Mode: {config.config.stripe.secretKey.includes('test') ? 'Test' : 'Live'}</p>
+                        <Text type="secondary" style={{ fontSize: '14px' }}>
+                          Mode: {config.config.stripe.secretKey.includes('test') ? 'Test' : 'Live'}
+                        </Text>
                       )}
                       {config.type === 'salesforce' && config.config.salesforce?.instanceUrl && (
-                        <p>Org: {new URL(config.config.salesforce.instanceUrl).hostname}</p>
+                        <Text type="secondary" style={{ fontSize: '14px' }}>
+                          Org: {new URL(config.config.salesforce.instanceUrl).hostname}
+                        </Text>
                       )}
-                    </div>
+                    </Space>
                   )}
-                  <div className="text-xs text-muted-foreground mt-2">
+                  <Text type="secondary" style={{ fontSize: '12px', marginTop: '8px', display: 'block' }}>
                     Click to configure →
-                  </div>
+                  </Text>
                 </div>
               </div>
-            </div>
+            </Card>
           );
         })}
-      </div>
-    </div>
+      </Space>
+    </Space>
   );
 }

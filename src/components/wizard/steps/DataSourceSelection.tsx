@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
+import { Card, Radio, Badge, Collapse, Space, Typography, Row, Col } from 'antd';
+import { DatabaseOutlined, GlobalOutlined, CreditCardOutlined, BuildOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { useWizard, type DataSourceType, type DataType } from '@/contexts/WizardContext';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Badge } from '@/components/ui/badge';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Database, Globe, CreditCard, Building2, Check, ArrowRight } from 'lucide-react';
+
+const { Text, Title } = Typography;
+const { Panel } = Collapse;
 
 const dataSourceOptions = [
   {
     type: 'csv' as DataSourceType,
     title: 'Manual CSV Upload',
     description: 'Upload CSV files for your revenue data entities',
-    icon: Database,
+    icon: DatabaseOutlined,
     features: ['Upload multiple files', 'Entity mapping', 'Data validation'],
     requiresDataType: true,
   },
@@ -21,7 +19,7 @@ const dataSourceOptions = [
     type: 'api' as DataSourceType,
     title: 'API Integration',
     description: 'Connect to your existing API endpoints',
-    icon: Globe,
+    icon: GlobalOutlined,
     features: ['REST API support', 'Authentication methods', 'Real-time sync'],
     requiresDataType: true,
   },
@@ -29,7 +27,7 @@ const dataSourceOptions = [
     type: 'stripe' as DataSourceType,
     title: 'Stripe Integration',
     description: 'Import data directly from your Stripe account',
-    icon: CreditCard,
+    icon: CreditCardOutlined,
     features: ['Payment data', 'Subscription metrics', 'Customer insights'],
     requiresDataType: false,
   },
@@ -37,7 +35,7 @@ const dataSourceOptions = [
     type: 'salesforce' as DataSourceType,
     title: 'Salesforce Integration',
     description: 'Connect to your Salesforce CRM data',
-    icon: Building2,
+    icon: BuildOutlined,
     features: ['Lead tracking', 'Opportunity data', 'Account management'],
     requiresDataType: false,
   },
@@ -98,144 +96,176 @@ export function DataSourceSelection() {
 
 
   return (
-    <div>
-      <Accordion type="single" collapsible defaultValue="data-sources" className="space-y-4">
-        <AccordionItem value="data-sources">
-          <AccordionTrigger className="text-xl font-semibold">
-            1. Select data sources
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="mb-6">
-              <p className="text-muted-foreground">
-                Select one or more data sources to connect to your revenue analytics dashboard.
-                You can configure each source individually in the next step.
-              </p>
-            </div>
+    <Space direction="vertical" style={{ width: '100%' }} size="large">
+      <Collapse defaultActiveKey={['data-sources']} size="large">
+        <Panel 
+          header={<Title level={3} style={{ margin: 0 }}>1. Select data sources</Title>} 
+          key="data-sources"
+        >
+          <Space direction="vertical" style={{ width: '100%' }} size="large">
+            <Text type="secondary">
+              Select one or more data sources to connect to your revenue analytics dashboard.
+              You can configure each source individually in the next step.
+            </Text>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Row gutter={[16, 16]}>
               {dataSourceOptions.map((option) => {
                 const Icon = option.icon;
                 const isSelected = selectedSources.includes(option.type);
 
                 return (
-                  <Card
-                    key={option.type}
-                    className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                      isSelected ? 'ring-2 ring-primary border-primary' : 'hover:border-primary/50'
-                    }`}
-                    onClick={() => handleSourceClick(option.type)}
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                            <Icon className="w-5 h-5" />
+                  <Col span={12} key={option.type}>
+                    <Card
+                      hoverable
+                      style={{
+                        cursor: 'pointer',
+                        border: isSelected ? '2px solid hsl(var(--primary))' : '1px solid hsl(var(--border))',
+                        background: isSelected ? 'hsl(var(--primary) / 0.05)' : 'transparent'
+                      }}
+                      onClick={() => handleSourceClick(option.type)}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
+                        <Space>
+                          <div style={{ 
+                            padding: '8px', 
+                            borderRadius: '8px', 
+                            background: isSelected ? 'hsl(var(--primary))' : 'hsl(var(--muted))',
+                            color: isSelected ? 'hsl(var(--primary-foreground))' : 'inherit'
+                          }}>
+                            <Icon style={{ fontSize: '20px' }} />
                           </div>
-                          <div>
-                            <h3 className="font-medium text-foreground">{option.title}</h3>
-                          </div>
-                        </div>
+                          <Title level={5} style={{ margin: 0, color: 'hsl(var(--foreground))' }}>
+                            {option.title}
+                          </Title>
+                        </Space>
                         {isSelected && (
-                          <div className="p-1 rounded-full bg-primary text-primary-foreground">
-                            <Check className="w-3 h-3" />
+                          <div style={{ 
+                            padding: '4px', 
+                            borderRadius: '50%', 
+                            background: 'hsl(var(--primary))', 
+                            color: 'hsl(var(--primary-foreground))' 
+                          }}>
+                            <CheckCircleOutlined style={{ fontSize: '12px' }} />
                           </div>
                         )}
                       </div>
                       
-                      <p className="text-sm text-muted-foreground mb-4">
+                      <Text type="secondary" style={{ fontSize: '14px', marginBottom: '16px', display: 'block' }}>
                         {option.description}
-                      </p>
+                      </Text>
                       
-                      <div className="space-y-1">
+                      <Space direction="vertical" size="small">
                         {option.features.map((feature, index) => (
-                          <div key={index} className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <div className="w-1 h-1 rounded-full bg-primary" />
-                            {feature}
+                          <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ 
+                              width: '4px', 
+                              height: '4px', 
+                              borderRadius: '50%', 
+                              background: 'hsl(var(--primary))' 
+                            }} />
+                            <Text type="secondary" style={{ fontSize: '12px' }}>{feature}</Text>
                           </div>
                         ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </Space>
+                    </Card>
+                  </Col>
                 );
               })}
-            </div>
+            </Row>
 
             {selectedSources.length > 0 && (
-              <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-                <h4 className="font-medium text-foreground mb-2">Selected Sources ({selectedSources.length})</h4>
-                <div className="flex flex-wrap gap-2">
+              <div style={{ 
+                padding: '16px', 
+                background: 'hsl(var(--muted) / 0.5)', 
+                borderRadius: '8px' 
+              }}>
+                <Title level={5} style={{ color: 'hsl(var(--foreground))', marginBottom: '8px' }}>
+                  Selected Sources ({selectedSources.length})
+                </Title>
+                <Space wrap>
                   {selectedSources.map((sourceType) => {
                     const option = dataSourceOptions.find(opt => opt.type === sourceType);
                     const Icon = option?.icon;
                     return (
                       <div
                         key={sourceType}
-                        className="flex items-center gap-2 px-3 py-1 bg-background rounded-md border text-sm"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '4px 12px',
+                          background: 'hsl(var(--background))',
+                          borderRadius: '6px',
+                          border: '1px solid hsl(var(--border))',
+                          fontSize: '14px'
+                        }}
                       >
-                        {Icon && <Icon className="w-3 h-3" />}
+                        {Icon && <Icon style={{ fontSize: '12px' }} />}
                         {option?.title}
                       </div>
                     );
                   })}
-                </div>
+                </Space>
               </div>
             )}
-          </AccordionContent>
-        </AccordionItem>
+          </Space>
+        </Panel>
 
         {/* Data Type Selection - Required for CSV and API */}
         {requiresDataTypeSelection && (
-          <AccordionItem value="data-type">
-            <AccordionTrigger className="text-xl font-semibold">
-              2. Select Your Data Model
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="destructive" className="text-xs">Required</Badge>
-                  <span className="text-sm text-muted-foreground">
+          <Panel 
+            header={<Title level={3} style={{ margin: 0 }}>2. Select Your Data Model</Title>} 
+            key="data-type"
+          >
+            <Space direction="vertical" style={{ width: '100%' }} size="large">
+              <div>
+                <Space style={{ marginBottom: '8px' }}>
+                  <Badge color="red" text="Required" />
+                  <Text type="secondary" style={{ fontSize: '14px' }}>
                     for Manual CSV Upload and API Integration
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground">
+                  </Text>
+                </Space>
+                <Text type="secondary" style={{ fontSize: '14px' }}>
                   Different calculation mechanisms will be considered based on the data type you select. 
                   This determines which entities and relationships will be configured for your data sources.
-                </p>
+                </Text>
               </div>
               
-              <RadioGroup value={selectedDataType} onValueChange={(value) => handleDataTypeChange(value as DataType)}>
-                <div className="space-y-4">
+              <Radio.Group 
+                value={selectedDataType} 
+                onChange={(e) => handleDataTypeChange(e.target.value as DataType)}
+                style={{ width: '100%' }}
+              >
+                <Space direction="vertical" style={{ width: '100%' }} size="large">
                   {dataTypeOptions.map((option) => (
-                    <div key={option.value} className={`flex items-start space-x-3 ${option.disabled ? 'opacity-50' : ''}`}>
-                      <RadioGroupItem 
+                    <div key={option.value} style={{ opacity: option.disabled ? 0.5 : 1 }}>
+                      <Radio 
                         value={option.value} 
-                        id={option.value} 
-                        className="mt-1" 
                         disabled={option.disabled}
-                      />
-                      <div className="flex-1 space-y-2">
-                        <Label htmlFor={option.value} className={`font-medium ${option.disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
-                          {option.label}
-                        </Label>
-                        <p className="text-sm text-muted-foreground">
-                          {option.description}
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {option.entities.map((entity) => (
-                            <Badge key={entity} variant="outline" className="text-xs">
-                              {entity}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
+                        style={{ alignItems: 'flex-start' }}
+                      >
+                        <Space direction="vertical" size="small" style={{ marginLeft: '8px' }}>
+                          <Text strong style={{ cursor: option.disabled ? 'not-allowed' : 'pointer' }}>
+                            {option.label}
+                          </Text>
+                          <Text type="secondary" style={{ fontSize: '14px' }}>
+                            {option.description}
+                          </Text>
+                          <Space wrap>
+                            {option.entities.map((entity) => (
+                              <Badge key={entity} color="default" text={entity} />
+                            ))}
+                          </Space>
+                        </Space>
+                      </Radio>
                     </div>
                   ))}
-                </div>
-              </RadioGroup>
-            </AccordionContent>
-          </AccordionItem>
+                </Space>
+              </Radio.Group>
+            </Space>
+          </Panel>
         )}
-      </Accordion>
-    </div>
+      </Collapse>
+    </Space>
   );
 }

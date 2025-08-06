@@ -1,16 +1,16 @@
 import React from 'react';
+import { Card, Button, Badge, Typography, Space, Divider } from 'antd';
+import { PlusOutlined, DatabaseOutlined, GlobalOutlined, CreditCardOutlined, BuildOutlined, CloseOutlined } from '@ant-design/icons';
 import { useWizard } from '@/contexts/WizardContext';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Database, Globe, CreditCard, Building2, X } from 'lucide-react';
 import type { DataSourceType } from '@/contexts/WizardContext';
 
+const { Title, Text } = Typography;
+
 const sourceIcons = {
-  csv: Database,
-  api: Globe,
-  stripe: CreditCard,
-  salesforce: Building2,
+  csv: DatabaseOutlined,
+  api: GlobalOutlined,
+  stripe: CreditCardOutlined,
+  salesforce: BuildOutlined,
 };
 
 const sourceLabels = {
@@ -21,9 +21,9 @@ const sourceLabels = {
 };
 
 const statusConfig = {
-  not_configured: { label: 'Not Configured', color: 'secondary' as const, icon: '⭕' },
-  in_progress: { label: 'In Progress', color: 'default' as const, icon: '🟡' },
-  configured: { label: 'Configured', color: 'default' as const, icon: '✅' },
+  not_configured: { label: 'Not Configured', color: 'default' as const, icon: '⭕' },
+  in_progress: { label: 'In Progress', color: 'processing' as const, icon: '🟡' },
+  configured: { label: 'Configured', color: 'success' as const, icon: '✅' },
 };
 
 export function WizardSidebar() {
@@ -52,102 +52,111 @@ export function WizardSidebar() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Data Sources</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <Card 
+      title={<Title level={4} style={{ margin: 0 }}>Data Sources</Title>}
+      style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
+    >
+      <Space direction="vertical" style={{ width: '100%' }} size="middle">
         {/* Selected Sources List */}
         {configArray.length > 0 && (
-          <div className="space-y-2">
+          <Space direction="vertical" style={{ width: '100%' }} size="small">
             {configArray.map((config) => {
               const Icon = sourceIcons[config.type];
               const status = statusConfig[config.status];
               const isActive = config.id === activeSourceId;
               
               return (
-                <div
+                <Card
                   key={config.id}
-                  className={`p-3 rounded-lg border cursor-pointer transition-colors group ${
-                    isActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                  }`}
+                  size="small"
+                  hoverable
+                  style={{ 
+                    cursor: 'pointer',
+                    border: isActive ? '2px solid hsl(var(--primary))' : '1px solid hsl(var(--border))',
+                    background: isActive ? 'hsl(var(--primary) / 0.05)' : 'transparent'
+                  }}
                   onClick={() => handleSourceClick(config.id)}
+                  extra={
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<CloseOutlined />}
+                      onClick={(e) => handleRemoveSource(e, config.id)}
+                      style={{ opacity: 0.7 }}
+                    />
+                  }
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Icon className="w-4 h-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium text-foreground">
-                          {sourceLabels[config.type]}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs">{status.icon}</span>
-                          <Badge variant={status.color} className="text-xs">
-                            {status.label}
-                          </Badge>
-                        </div>
+                  <Space>
+                    <Icon style={{ color: 'hsl(var(--muted-foreground))' }} />
+                    <div>
+                      <Text strong style={{ fontSize: '14px', color: 'hsl(var(--foreground))' }}>
+                        {sourceLabels[config.type]}
+                      </Text>
+                      <div style={{ marginTop: '4px' }}>
+                        <Space size="small">
+                          <span style={{ fontSize: '12px' }}>{status.icon}</span>
+                          <Badge color={status.color} text={status.label} />
+                        </Space>
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
-                      onClick={(e) => handleRemoveSource(e, config.id)}
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </div>
+                  </Space>
                   
                   {/* Configuration Summary */}
                   {config.status !== 'not_configured' && (
-                    <div className="mt-2 pt-2 border-t border-border">
-                      <p className="text-xs text-muted-foreground">
+                    <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid hsl(var(--border))' }}>
+                      <Text type="secondary" style={{ fontSize: '12px' }}>
                         {config.dataType && `Data Type: ${config.dataType.replace('_', ' + ')}`}
-                      </p>
+                      </Text>
                       {config.type === 'csv' && config.config.csv && (
-                        <p className="text-xs text-muted-foreground">
-                          Files: {config.config.csv.uploadedFiles.length}/{config.config.csv.requiredEntities.length}
-                        </p>
+                        <div>
+                          <Text type="secondary" style={{ fontSize: '12px' }}>
+                            Files: {config.config.csv.uploadedFiles.length}/{config.config.csv.requiredEntities.length}
+                          </Text>
+                        </div>
                       )}
                     </div>
                   )}
-                </div>
+                </Card>
               );
             })}
-          </div>
+          </Space>
         )}
 
         {/* Add Another Source Button */}
         <Button
-          variant="outline"
-          className="w-full"
+          block
+          icon={<PlusOutlined />}
           onClick={handleAddSource}
         >
-          <Plus className="w-4 h-4 mr-2" />
           Add Data Source
         </Button>
 
         {/* Progress Summary */}
         {configArray.length > 0 && (
-          <div className="pt-4 border-t border-border">
-            <h4 className="text-sm font-medium text-foreground mb-2">Progress Summary</h4>
-            <div className="space-y-1 text-xs text-muted-foreground">
-              <div className="flex justify-between">
-                <span>Total Sources:</span>
-                <span>{configArray.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Configured:</span>
-                <span>{configArray.filter(c => c.status === 'configured').length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>In Progress:</span>
-                <span>{configArray.filter(c => c.status === 'in_progress').length}</span>
-              </div>
+          <>
+            <Divider />
+            <div>
+              <Title level={5} style={{ color: 'hsl(var(--foreground))', marginBottom: '8px' }}>
+                Progress Summary
+              </Title>
+              <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Text type="secondary" style={{ fontSize: '12px' }}>Total Sources:</Text>
+                  <Text style={{ fontSize: '12px' }}>{configArray.length}</Text>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Text type="secondary" style={{ fontSize: '12px' }}>Configured:</Text>
+                  <Text style={{ fontSize: '12px' }}>{configArray.filter(c => c.status === 'configured').length}</Text>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Text type="secondary" style={{ fontSize: '12px' }}>In Progress:</Text>
+                  <Text style={{ fontSize: '12px' }}>{configArray.filter(c => c.status === 'in_progress').length}</Text>
+                </div>
+              </Space>
             </div>
-          </div>
+          </>
         )}
-      </CardContent>
+      </Space>
     </Card>
   );
 }

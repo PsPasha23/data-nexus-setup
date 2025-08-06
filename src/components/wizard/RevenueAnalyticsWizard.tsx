@@ -1,23 +1,27 @@
 import React from 'react';
+import { Typography, Layout } from 'antd';
 import { WizardProvider } from '@/contexts/WizardContext';
 import { WizardContainer } from './WizardContainer';
+
+const { Title, Paragraph } = Typography;
+const { Content } = Layout;
 
 export function RevenueAnalyticsWizard() {
   return (
     <WizardProvider>
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto py-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
+      <Layout style={{ minHeight: '100vh', background: 'hsl(var(--background))' }}>
+        <Content style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <Title level={1} style={{ color: 'hsl(var(--foreground))', marginBottom: '8px' }}>
               Revenue Analytics Setup
-            </h1>
-            <p className="text-muted-foreground">
+            </Title>
+            <Paragraph style={{ color: 'hsl(var(--muted-foreground))' }}>
               Configure your data sources to start analyzing revenue patterns
-            </p>
+            </Paragraph>
           </div>
           <WizardContainer />
-        </div>
-      </div>
+        </Content>
+      </Layout>
     </WizardProvider>
   );
 }
