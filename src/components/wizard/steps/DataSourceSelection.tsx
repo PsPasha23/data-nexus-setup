@@ -98,7 +98,7 @@ export function DataSourceSelection() {
       <Accordion type="single" collapsible className="space-y-4">
         <AccordionItem value="data-sources">
           <AccordionTrigger className="text-xl font-semibold">
-            Select data sources
+            1. Select data sources
           </AccordionTrigger>
           <AccordionContent>
             <div className="mb-6">
@@ -183,7 +183,7 @@ export function DataSourceSelection() {
         {requiresDataTypeSelection && (
           <AccordionItem value="data-type">
             <AccordionTrigger className="text-xl font-semibold">
-              Select Your Data Model
+              2. Select Your Data Model
             </AccordionTrigger>
             <AccordionContent>
               <div className="mb-4">
